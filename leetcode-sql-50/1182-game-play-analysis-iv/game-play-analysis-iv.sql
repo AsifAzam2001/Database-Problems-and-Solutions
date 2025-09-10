@@ -1,4 +1,24 @@
 WITH
+    CTE AS (
+        SELECT
+            player_id,
+            event_date,
+            MIN(event_date) OVER (PARTITION BY player_id) AS first_login_date
+        FROM
+            Activity
+    )
+SELECT
+    ROUND(
+        SUM(DATEDIFF(event_date, first_login_date) = 1) / COUNT(DISTINCT player_id),
+        2
+    ) AS fraction
+FROM
+    CTE;
+
+/*
+# Alternative Solution
+
+WITH
     FirstLogins AS (
         SELECT
             player_id,
@@ -14,3 +34,5 @@ FROM
     FirstLogins f
     LEFT JOIN Activity a ON f.player_id = a.player_id
     AND a.event_date = DATE_ADD(f.first_login_date, INTERVAL 1 DAY);
+
+*/
