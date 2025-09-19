@@ -1,4 +1,40 @@
 WITH
+    AllFriendConnections AS (
+        SELECT
+            requester_id AS id
+        FROM
+            RequestAccepted
+        UNION ALL
+        SELECT
+            accepter_id AS id
+        FROM
+            RequestAccepted
+    ),
+    RankedFriends AS (
+        SELECT
+            id,
+            COUNT(id) AS num,
+            RANK() OVER (
+                ORDER BY
+                    COUNT(id) DESC
+            ) as rnk
+        FROM
+            AllFriendConnections
+        GROUP BY
+            id
+    )
+SELECT
+    id,
+    num
+FROM
+    RankedFriends
+WHERE
+    rnk = 1;
+
+/*
+# Alternative Solution:
+
+WITH
     Users AS (
         SELECT
             requester_id AS id
@@ -39,3 +75,5 @@ ORDER BY
     num DESC
 LIMIT 
     1;
+
+*/
